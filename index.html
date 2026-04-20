@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Smoke-Free Countdown · May 20, 2026</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --g900: #04342C;
+      --g800: #085041;
+      --g700: #0F6E56;
+      --g500: #1D9E75;
+      --g300: #5DCAA5;
+      --g200: #9FE1CB;
+      --g100: #E1F5EE;
+      --ink: #1a1a18;
+      --ink-muted: #666662;
+      --ink-faint: #99998f;
+      --surface: #f5f4f0;
+      --white: #ffffff;
+      --border: rgba(0,0,0,0.07);
+      --border-mid: rgba(0,0,0,0.12);
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--surface);
+      color: var(--ink);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 3rem 1.25rem 5rem;
+    }
+
+    .wrap { width: 100%; max-width: 580px; }
+
+    /* HERO */
+    .hero { text-align: center; margin-bottom: 2.5rem; }
+
+    .hero-eyebrow {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--g700);
+      margin-bottom: 1rem;
+    }
+
+    .hero-num {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(88px, 22vw, 128px);
+      line-height: 1;
+      color: var(--ink);
+      display: block;
+    }
+
+    .hero-unit {
+      font-size: 15px;
+      font-weight: 300;
+      color: var(--ink-muted);
+      letter-spacing: 0.04em;
+      margin-top: 0.4rem;
+      display: block;
+    }
+
+    .hero-date {
+      font-family: 'DM Serif Display', serif;
+      font-style: italic;
+      font-size: 19px;
+      color: var(--ink-muted);
+      margin-top: 1rem;
+    }
+
+    /* PROGRESS */
+    .progress-section { margin-bottom: 2.5rem; }
+
+    .progress-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--ink-faint);
+      margin-bottom: 7px;
+    }
+
+    .progress-track {
+      height: 3px;
+      background: var(--border-mid);
+      border-radius: 99px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--g500);
+      border-radius: 99px;
+      width: 0%;
+      transition: width 1.2s cubic-bezier(0.4,0,0.2,1);
+    }
+
+    /* STATS */
+    .stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 2.5rem;
+    }
+
+    .stat-card {
+      background: var(--white);
+      border: 0.5px solid var(--border-mid);
+      border-radius: 12px;
+      padding: 1rem 1.25rem;
+    }
+
+    .stat-label {
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--ink-faint);
+      margin-bottom: 5px;
+    }
+
+    .stat-value {
+      font-family: 'DM Serif Display', serif;
+      font-size: 30px;
+      color: var(--ink);
+      line-height: 1;
+    }
+
+    .stat-sub {
+      font-size: 11px;
+      color: var(--ink-faint);
+      margin-top: 3px;
+    }
+
+    /* CALENDAR */
+    .cal-section-label {
+      font-size: 10px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--ink-faint);
+      margin-bottom: 1.25rem;
+    }
+
+    .cal-month { margin-bottom: 2rem; }
+
+    .cal-month-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: 20px;
+      color: var(--ink);
+      margin-bottom: 0.75rem;
+    }
+
+    .cal-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
+    }
+
+    .day-name {
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--ink-faint);
+      text-align: center;
+      padding-bottom: 6px;
+    }
+
+    .cal-cell {
+      aspect-ratio: 1;
+      border-radius: 7px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 400;
+      transition: transform 0.1s, box-shadow 0.1s;
+      user-select: none;
+      line-height: 1.1;
+    }
+
+    .cal-cell.empty { background: transparent; pointer-events: none; }
+
+    .cal-cell.past {
+      background: var(--g100);
+      color: var(--g700);
+      cursor: pointer;
+    }
+
+    .cal-cell.today {
+      background: var(--g500);
+      color: #fff;
+      font-weight: 500;
+      cursor: pointer;
+    }
+
+    .cal-cell.future {
+      background: var(--white);
+      color: var(--ink);
+      border: 0.5px solid var(--border-mid);
+      cursor: pointer;
+    }
+
+    .cal-cell.target {
+      background: var(--g900);
+      color: var(--g200);
+      font-weight: 500;
+      cursor: pointer;
+      font-family: 'DM Serif Display', serif;
+      font-size: 14px;
+    }
+
+    .cal-cell:not(.empty):hover { transform: scale(1.07); box-shadow: 0 2px 10px rgba(0,0,0,0.09); z-index: 1; position: relative; }
+    .cal-cell:not(.empty):active { transform: scale(0.97); }
+
+    .cell-num { pointer-events: none; }
+
+    .cell-badge {
+      font-size: 8px;
+      font-weight: 500;
+      line-height: 1;
+      margin-top: 2px;
+      opacity: 0.65;
+      pointer-events: none;
+    }
+
+    .cal-cell.past .cell-badge   { color: var(--g700); }
+    .cal-cell.today .cell-badge  { color: rgba(255,255,255,0.85); }
+    .cal-cell.future .cell-badge { color: var(--ink-faint); }
+    .cal-cell.target .cell-badge { color: var(--g300); }
+
+    /* LEGEND */
+    .legend {
+      display: flex;
+      gap: 1.25rem;
+      flex-wrap: wrap;
+      margin-top: 0.5rem;
+      padding-top: 1.25rem;
+      border-top: 0.5px solid var(--border-mid);
+      margin-bottom: 2rem;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: var(--ink-faint);
+    }
+
+    .legend-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 3px;
+      flex-shrink: 0;
+    }
+
+    /* MODAL */
+    .overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(4, 52, 44, 0.6);
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+      padding: 1.25rem;
+    }
+
+    .overlay.open { display: flex; }
+
+    .modal {
+      background: var(--white);
+      border-radius: 20px;
+      padding: 2.5rem 2rem 2rem;
+      max-width: 400px;
+      width: 100%;
+      text-align: center;
+      animation: popIn 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    @keyframes popIn {
+      from { opacity: 0; transform: scale(0.85); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+
+    .modal-date-label {
+      font-size: 11px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--ink-faint);
+      margin-bottom: 0.75rem;
+    }
+
+    .modal-big-num {
+      font-family: 'DM Serif Display', serif;
+      font-size: 100px;
+      line-height: 1;
+      color: var(--ink);
+    }
+
+    .modal-unit {
+      font-size: 14px;
+      font-weight: 300;
+      color: var(--ink-muted);
+      margin: 0.3rem 0 2rem;
+    }
+
+    .modal-divider {
+      width: 40px;
+      height: 1px;
+      background: var(--border-mid);
+      margin: 0 auto 1.5rem;
+    }
+
+    .modal-quote {
+      font-family: 'DM Serif Display', serif;
+      font-style: italic;
+      font-size: 18px;
+      color: var(--ink);
+      line-height: 1.55;
+      margin-bottom: 0.6rem;
+    }
+
+    .modal-author {
+      font-size: 12px;
+      color: var(--ink-faint);
+      letter-spacing: 0.06em;
+      margin-bottom: 2rem;
+    }
+
+    .modal-close {
+      background: var(--g900);
+      color: var(--g200);
+      border: none;
+      border-radius: 10px;
+      padding: 0.75rem 2.5rem;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.15s;
+      letter-spacing: 0.02em;
+    }
+
+    .modal-close:hover { background: var(--g800); }
+
+    /* FOOTER */
+    .footer {
+      text-align: center;
+      font-size: 12px;
+      color: var(--ink-faint);
+    }
+  </style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <div class="hero">
+    <p class="hero-eyebrow">Big Man Justin's Countdown to Smoke-Free</p>
+    <span class="hero-num" id="heroNum">—</span>
+    <span class="hero-unit" id="heroUnit">days to go</span>
+    <p class="hero-date">May 20, 2026 · turning 30</p>
+  </div>
+
+  <div class="progress-section">
+    <div class="progress-meta">
+      <span>20 Apr 2026</span>
+      <span id="progressPct">—</span>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" id="progressFill"></div>
+    </div>
+    <div class="progress-meta" style="margin-top:6px; margin-bottom:0;">
+      <span></span>
+      <span>20 May 2026</span>
+    </div>
+  </div>
+
+  <div class="stats" id="statsRow"></div>
+
+  <p class="cal-section-label">tap any day to see your countdown</p>
+  <div id="calContainer"></div>
+
+  <div class="legend">
+    <div class="legend-item">
+      <div class="legend-dot" style="background:var(--g100)"></div>past
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot" style="background:var(--g500)"></div>today
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot" style="background:var(--white);border:0.5px solid var(--border-mid)"></div>upcoming
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot" style="background:var(--g900)"></div>goal day
+    </div>
+  </div>
+
+  <div class="footer">every day counts · you've got this</div>
+
+</div>
+
+<!-- MODAL -->
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <p class="modal-date-label" id="modalDateLabel"></p>
+    <p class="modal-big-num"    id="modalBigNum"></p>
+    <p class="modal-unit"       id="modalUnit"></p>
+    <div class="modal-divider"></div>
+    <p class="modal-quote"      id="modalQuote"></p>
+    <p class="modal-author"     id="modalAuthor"></p>
+    <button class="modal-close" onclick="closeModal()">close</button>
+  </div>
+</div>
+
+<script>
+  const TARGET     = new Date('2026-05-20T00:00:00');
+  const PROG_START = new Date('2026-04-20T00:00:00');
+
+  const QUOTES = [
+    { q: "Your future self is watching you through memories.", a: "— unknown" },
+    { q: "The secret of getting ahead is getting started.", a: "— Mark Twain" },
+    { q: "It always seems impossible until it's done.", a: "— Nelson Mandela" },
+    { q: "Believe you can and you're halfway there.", a: "— Theodore Roosevelt" },
+    { q: "You don't have to be great to start, but you have to start to be great.", a: "— Zig Ziglar" },
+    { q: "Health is a relationship between you and your body.", a: "— Terri Guillemets" },
+    { q: "Take care of your body. It's the only place you have to live.", a: "— Jim Rohn" },
+    { q: "Every breath you don't smoke is a gift to yourself.", a: "— unknown" },
+    { q: "Strength does not come from the body. It comes from the will.", a: "— unknown" },
+    { q: "You are braver than you believe, stronger than you seem.", a: "— A.A. Milne" },
+    { q: "Nothing is impossible — the word itself says 'I'm possible.'", a: "— Audrey Hepburn" },
+    { q: "The best time to quit was yesterday. The next best time is now.", a: "— unknown" },
+    { q: "Small daily improvements are the key to staggering long-term results.", a: "— Robin Sharma" },
+    { q: "You only fail when you stop trying.", a: "— unknown" },
+    { q: "Difficult roads often lead to beautiful destinations.", a: "— unknown" },
+    { q: "The harder the battle, the sweeter the victory.", a: "— Les Brown" },
+    { q: "Your lungs are working to heal themselves. Help them.", a: "— unknown" },
+    { q: "One day or day one — you decide.", a: "— unknown" },
+    { q: "The groundwork of all happiness is health.", a: "— Leigh Hunt" },
+    { q: "Do something today that your future self will thank you for.", a: "— Sean Patrick Flanery" },
+    { q: "Courage is resistance to fear, mastery of fear — not absence of it.", a: "— Mark Twain" },
+    { q: "You are not a product of your circumstances. You are a product of your decisions.", a: "— Stephen Covey" },
+    { q: "Every cigarette you don't smoke is an immediate victory.", a: "— unknown" },
+    { q: "A year from now you will wish you had started today.", a: "— Karen Lamb" },
+    { q: "Discipline is choosing between what you want now and what you want most.", a: "— Abraham Lincoln" },
+    { q: "Change is hard at first, messy in the middle, and gorgeous at the end.", a: "— Robin Sharma" },
+    { q: "What lies behind us and what lies before us are tiny matters compared to what lies within us.", a: "— Ralph Waldo Emerson" },
+    { q: "The secret to change is to focus all your energy not on fighting the old, but on building the new.", a: "— Socrates" },
+    { q: "You have power over your mind — not outside events. Realize this, and you will find strength.", a: "— Marcus Aurelius" },
+    { q: "Each new day is a new chance to change your life.", a: "— unknown" },
+  ];
+
+  function today() {
+    const d = new Date();
+    d.setHours(0, 0, 0, 0);
+    return d;
+  }
+
+  function diffDays(a, b) {
+    return Math.round((b - a) / 86400000);
+  }
+
+  function quoteForDate(dateStr) {
+    let hash = 0;
+    for (let i = 0; i < dateStr.length; i++) {
+      hash = (hash * 31 + dateStr.charCodeAt(i)) & 0xffffffff;
+    }
+    return QUOTES[Math.abs(hash) % QUOTES.length];
+  }
+
+  function openModal(date) {
+    const days = diffDays(date, TARGET);
+
+    document.getElementById('modalDateLabel').textContent =
+      date.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+
+    const numEl  = document.getElementById('modalBigNum');
+    const unitEl = document.getElementById('modalUnit');
+
+    if (days > 0) {
+      numEl.textContent  = days;
+      unitEl.textContent = days === 1 ? 'day until the goal' : 'days until the goal';
+    } else if (days === 0) {
+      numEl.textContent  = '🎉';
+      unitEl.textContent = 'this is the day — happy 30th!';
+    } else {
+      numEl.textContent  = Math.abs(days);
+      unitEl.textContent = Math.abs(days) === 1 ? 'day smoke-free' : 'days smoke-free';
+    }
+
+    const q = quoteForDate(date.toDateString());
+    document.getElementById('modalQuote').textContent  = '\u201C' + q.q + '\u201D';
+    document.getElementById('modalAuthor').textContent = q.a;
+
+    document.getElementById('overlay').classList.add('open');
+  }
+
+  function closeModal() {
+    document.getElementById('overlay').classList.remove('open');
+  }
+
+  document.getElementById('overlay').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+  });
+
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+  function buildCalendar() {
+    const now = today();
+
+    // Hero
+    const daysLeft = diffDays(now, TARGET);
+    const numEl    = document.getElementById('heroNum');
+    const unitEl   = document.getElementById('heroUnit');
+
+    if (daysLeft > 0) {
+      numEl.textContent  = daysLeft;
+      unitEl.textContent = daysLeft === 1 ? 'day to go' : 'days to go';
+    } else if (daysLeft === 0) {
+      numEl.textContent  = '🎉';
+      unitEl.textContent = 'today is the day — happy 30th!';
+    } else {
+      numEl.textContent  = Math.abs(daysLeft);
+      unitEl.textContent = 'days smoke-free and counting';
+    }
+
+    // Progress bar
+    const total   = diffDays(PROG_START, TARGET);      // 30 days
+    const elapsed = Math.max(0, diffDays(PROG_START, now));
+    const pct     = Math.min(100, Math.round((elapsed / total) * 100));
+    document.getElementById('progressPct').textContent = pct + '%';
+    setTimeout(() => { document.getElementById('progressFill').style.width = pct + '%'; }, 200);
+
+    // Stats
+    const weeksLeft = daysLeft > 0 ? Math.floor(daysLeft / 7) : 0;
+    const hoursLeft = daysLeft > 0 ? daysLeft * 24 : 0;
+    const statsData = [
+      { label: 'weeks left',  value: weeksLeft,                  sub: 'full weeks remaining' },
+      { label: 'hours left',  value: hoursLeft.toLocaleString(),  sub: 'approximately' },
+    ];
+    const row = document.getElementById('statsRow');
+    statsData.forEach(s => {
+      const c = document.createElement('div');
+      c.className = 'stat-card';
+      c.innerHTML = `<p class="stat-label">${s.label}</p><p class="stat-value">${s.value}</p><p class="stat-sub">${s.sub}</p>`;
+      row.appendChild(c);
+    });
+
+    // Calendar months: April 2026 and May 2026
+    const months = [
+      { year: 2026, month: 3 },
+      { year: 2026, month: 4 },
+    ];
+
+    const container  = document.getElementById('calContainer');
+    const dayHeaders = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
+
+    months.forEach(({ year, month }) => {
+      const wrapper = document.createElement('div');
+      wrapper.className = 'cal-month';
+
+      const title = document.createElement('p');
+      title.className = 'cal-month-title';
+      title.textContent = new Date(year, month, 1)
+        .toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
+      wrapper.appendChild(title);
+
+      const grid = document.createElement('div');
+      grid.className = 'cal-grid';
+
+      dayHeaders.forEach(n => {
+        const h = document.createElement('div');
+        h.className = 'day-name';
+        h.textContent = n;
+        grid.appendChild(h);
+      });
+
+      // Monday-first offset
+      const firstDay  = new Date(year, month, 1);
+      const startSlot = (firstDay.getDay() + 6) % 7;
+      for (let i = 0; i < startSlot; i++) {
+        const empty = document.createElement('div');
+        empty.className = 'cal-cell empty';
+        grid.appendChild(empty);
+      }
+
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+      for (let d = 1; d <= daysInMonth; d++) {
+        const date = new Date(year, month, d);
+        date.setHours(0, 0, 0, 0);
+
+        const isTarget = date.toDateString() === TARGET.toDateString();
+        const isToday  = date.toDateString() === now.toDateString();
+        const isPast   = date < now;
+        const dToTarget = diffDays(date, TARGET);
+
+        const cell = document.createElement('div');
+        cell.className = 'cal-cell';
+
+        if (isTarget)      cell.classList.add('target');
+        else if (isToday)  cell.classList.add('today');
+        else if (isPast)   cell.classList.add('past');
+        else               cell.classList.add('future');
+
+        // Day number
+        const numSpan = document.createElement('span');
+        numSpan.className = 'cell-num';
+        numSpan.textContent = d;
+        cell.appendChild(numSpan);
+
+        // Mini countdown badge
+        const badge = document.createElement('span');
+        badge.className = 'cell-badge';
+        if (isTarget) {
+          badge.textContent = '🎉';
+        } else if (dToTarget > 0) {
+          badge.textContent = dToTarget + 'd';
+        } else {
+          badge.textContent = '+' + Math.abs(dToTarget) + 'd';
+        }
+        cell.appendChild(badge);
+
+        const capturedDate = new Date(date);
+        cell.addEventListener('click', () => openModal(capturedDate));
+        grid.appendChild(cell);
+      }
+
+      wrapper.appendChild(grid);
+      container.appendChild(wrapper);
+    });
+  }
+
+  buildCalendar();
+</script>
+</body>
+</html>
